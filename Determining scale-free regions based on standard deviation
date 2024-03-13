@@ -1,0 +1,45 @@
+function scale_free_region = findScaleFreeRegion(N, Y, threshold)
+% N 和 Y 是数据向量，threshold 是标准偏差的阈值，这里设为0.005
+% N and Y are the data vectors and threshold is the standard deviation threshold, which is set to 0.005 here.
+% 计算双对数
+%Compute double logarithms
+logN = log(N);
+logY = log(Y);
+
+% 初始化最宽范围和最小标准偏差
+% Initialize the widest range and smallest standard deviation
+widestRange = 0;
+minStdDev = Inf;
+bestStart = 0;
+bestEnd = 0;
+
+% 遍历所有可能的点组合
+% Iterate over all possible point combinations
+for startIdx = 1:length(logN)
+    for endIdx = startIdx:length(logN)
+        % 计算线性回归
+        % Calculate linear regression
+        [p, S] = polyfit(logN(startIdx:endIdx), logY(startIdx:endIdx), 1);
+        [Y_fit, delta] = polyval(p, logN(startIdx:endIdx), S);
+        
+        % 计算标准偏差
+        % Calculate standard deviation
+        stdDev = std(delta);
+        
+        % 检查是否满足标准偏差阈值和是否是最宽范围
+        % Check that the standard deviation threshold is met and that it is the widest possible range
+        if stdDev < threshold && (endIdx - startIdx) > widestRange
+            widestRange = endIdx - startIdx;
+            minStdDev = stdDev;
+            bestStart = startIdx;
+            bestEnd = endIdx;
+        end
+    end
+end
+
+% 输出结果
+% output result
+scale_free_region = [bestStart, bestEnd];
+fprintf('Scale-free region is from %d to %d with std deviation of %f\n', bestStart, bestEnd, minStdDev);
+
+end
